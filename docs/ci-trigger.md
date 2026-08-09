@@ -1,3 +1,3 @@
 Trigger CI run to validate workflows
 
-This file was added automatically to trigger GitHub Actions (empty-commit alternative).
+Updated to trigger CI at 2026-08-09T10:40:21Z (automated commit from assistant)
