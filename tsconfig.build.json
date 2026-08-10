@@ -1,12 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false,
-    "outDir": "dist",
-    "rootDir": ".",
-    "declaration": false,
+    "noEmit": true,
     "incremental": false
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "dist-tests"]
+n  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "app/**/*.tsx", "components/**/*.tsx", "src/**/*.ts"]
 }
