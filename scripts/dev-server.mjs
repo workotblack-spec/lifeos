@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { realpath, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,54 +20,56 @@ function isInsideDirectory(filePath, directory) {
   return relativePath === '' || (!relativePath.startsWith('..') && !isAbsolute(relativePath));
 }
 
-export function resolveStaticFile(requestPath, directories = staticDirectories) {
+async function resolveExistingStaticFile(requestPath, directories = staticDirectories) {
   const urlPath = decodeURIComponent(new URL(requestPath, 'http://localhost').pathname);
   const relativePath = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
 
   for (const directory of directories) {
     const candidate = resolve(directory, relativePath);
 
-    if (!isInsideDirectory(candidate, directory)) {
+    try {
+      const realCandidate = await realpath(candidate);
+
+      if (!isInsideDirectory(realCandidate, directory)) {
+        continue;
+      }
+
+      const fileStat = await stat(realCandidate);
+      if (fileStat.isFile()) {
+        return realCandidate;
+      }
+    } catch {
       continue;
     }
-
-    return candidate;
   }
 
   return null;
 }
 
+export async function resolveStaticFile(requestPath, directories = staticDirectories) {
+  return resolveExistingStaticFile(requestPath, directories);
+}
+
 export async function serveStaticFile(request, response) {
-  const filePath = resolveStaticFile(request.url ?? '/');
+  const filePath = await resolveStaticFile(request.url ?? '/');
 
   if (!filePath) {
-    response.writeHead(403);
-    response.end('Forbidden');
+    response.writeHead(404);
+    response.end('Not found');
     return;
   }
 
-  try {
-    const fileStat = await stat(filePath);
-
-    if (!fileStat.isFile()) {
-      response.writeHead(404);
-      response.end('Not found');
-      return;
-    }
-
-    response.writeHead(200, {
-      'content-type': contentTypes.get(extname(filePath)) ?? 'application/octet-stream',
-    });
-    createReadStream(filePath).pipe(response);
-  } catch {
-    response.writeHead(404);
-    response.end('Not found');
-  }
+  response.writeHead(200, {
+    'content-type': contentTypes.get(extname(filePath)) ?? 'application/octet-stream',
+  });
+  createReadStream(filePath).pipe(response);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT ?? 4173);
-  createServer(serveStaticFile).listen(port, () => {
+  createServer((request, response) => {
+    void serveStaticFile(request, response);
+  }).listen(port, () => {
     console.log(`LifeOS dev server listening on http://localhost:${port}`);
   });
 }
