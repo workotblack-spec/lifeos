@@ -7,9 +7,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "."
+    "noEmit": true,
+    "jsx": "preserve"
   },
-  "include": ["src/**/*.ts", "scripts/**/*.mjs"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "scripts/**/*.mjs"],
   "exclude": ["dist", "dist-tests", "node_modules"]
 }
