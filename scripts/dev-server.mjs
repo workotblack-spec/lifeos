@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { stat, realpath } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,25 +20,35 @@ function isInsideDirectory(filePath, directory) {
   return relativePath === '' || (!relativePath.startsWith('..') && !isAbsolute(relativePath));
 }
 
-export function resolveStaticFile(requestPath, directories = staticDirectories) {
+export async function resolveStaticFile(requestPath, directories = staticDirectories) {
   const urlPath = decodeURIComponent(new URL(requestPath, 'http://localhost').pathname);
   const relativePath = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
 
   for (const directory of directories) {
-    const candidate = resolve(directory, relativePath);
+    try {
+      const candidate = resolve(directory, relativePath);
+      // Resolve symlinks to prevent serving files that point outside the static directory
+      const real = await realpath(candidate);
 
-    if (!isInsideDirectory(candidate, directory)) {
+      if (!isInsideDirectory(real, directory)) {
+        continue;
+      }
+
+      const st = await stat(real);
+      if (!st.isFile()) continue;
+
+      return real;
+    } catch (e) {
+      // If realpath/stat fail, continue to next directory
       continue;
     }
-
-    return candidate;
   }
 
   return null;
 }
 
 export async function serveStaticFile(request, response) {
-  const filePath = resolveStaticFile(request.url ?? '/');
+  const filePath = await resolveStaticFile(request.url ?? '/');
 
   if (!filePath) {
     response.writeHead(403);
