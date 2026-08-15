@@ -48,7 +48,7 @@ const initialRoutines = [
 
 const projects = [
   { name: 'G-Fondation', progress: 68, detail: 'Construire le produit' },
-  { name: 'Forme physique', progress: 72, detail: 'Atteindre 90 kg' },
+  { name: 'Forme physique', progress: 72, detail: 'Atteindre un objectif personnel' },
   { name: 'Marque personnelle', progress: 40, detail: 'Lancer le contenu' },
 ];
 
@@ -71,26 +71,15 @@ export default function HomePage() {
           <span className="brand-mark"><Crown size={20} weight="fill" /></span>
           <div><strong>G-FONDATION</strong><span>Discipline. Foi. Action.</span></div>
         </div>
-
         <nav className="side-nav" aria-label="Navigation principale">
           {navItems.map(({ label, icon: Icon }) => (
             <button key={label} className={active === label ? 'nav-item active' : 'nav-item'} onClick={() => setActive(label)}>
-              <Icon size={19} weight={active === label ? 'fill' : 'regular'} />
-              <span>{label}</span>
+              <Icon size={19} weight={active === label ? 'fill' : 'regular'} /><span>{label}</span>
             </button>
           ))}
         </nav>
-
-        <div className="side-quote">
-          <Sparkle size={18} weight="fill" />
-          <p>Une vie alignée. Un impact durable.</p>
-          <small>Chaque petit effort compte.</small>
-        </div>
-
-        <div className="profile-card">
-          <UserCircle size={34} weight="duotone" />
-          <div><strong>Gildas</strong><span>Discipline • Excellence</span></div>
-        </div>
+        <div className="side-quote"><Sparkle size={18} weight="fill" /><p>Une vie alignée. Un impact durable.</p><small>Chaque petit effort compte.</small></div>
+        <div className="profile-card"><UserCircle size={34} weight="duotone" /><div><strong>Profil</strong><span>Discipline • Excellence</span></div></div>
       </aside>
 
       <section className="workspace">
@@ -102,12 +91,8 @@ export default function HomePage() {
 
         <div className="content">
           <div className="hero-row">
-            <div>
-              <p className="eyebrow">TABLEAU DE BORD</p>
-              <h1>Bonjour Gildas <span>♛</span></h1>
-              <p className="subtitle">Sois fidèle dans les petites choses.</p>
-            </div>
-            <div className="date-pill"><CalendarDots size={18} /> Mardi 13 août 2026</div>
+            <div><p className="eyebrow">TABLEAU DE BORD</p><h1>Bonjour <Crown className="title-crown" size={28} weight="fill" /></h1><p className="subtitle">Sois fidèle dans les petites choses.</p></div>
+            <div className="date-pill"><CalendarDots size={18} /> Samedi 15 août 2026</div>
           </div>
 
           <div className="stats-grid">
@@ -120,23 +105,18 @@ export default function HomePage() {
           <div className="dashboard-grid">
             <section className="panel routines-panel">
               <div className="panel-heading"><div><h2>Routines du jour</h2><span>{routines.length - completed} restantes</span></div><button className="icon-button" aria-label="Ajouter une routine"><Plus size={18} /></button></div>
-              <div className="routine-list">
-                {routines.map((routine) => (
-                  <button key={routine.id} className="routine-row" onClick={() => toggleRoutine(routine.id)}>
-                    {routine.done ? <CheckCircle className="routine-check done" size={23} weight="fill" /> : <Circle className="routine-check" size={23} />}
-                    <span className="routine-main"><strong>{routine.title}</strong><small>{routine.duration}</small></span>
-                    <time>{routine.time}</time>
-                  </button>
-                ))}
-              </div>
+              <div className="routine-list">{routines.map((routine) => (
+                <button key={routine.id} className="routine-row" onClick={() => toggleRoutine(routine.id)}>
+                  {routine.done ? <CheckCircle className="routine-check done" size={23} weight="fill" /> : <Circle className="routine-check" size={23} />}
+                  <span className="routine-main"><strong>{routine.title}</strong><small>{routine.duration}</small></span><time>{routine.time}</time>
+                </button>
+              ))}</div>
               <button className="secondary-button">Voir toutes les routines</button>
             </section>
 
             <section className="panel progress-panel">
               <div className="panel-heading"><div><h2>Progression hebdomadaire</h2><span>Ton rythme des 7 derniers jours</span></div><span className="badge">78%</span></div>
-              <div className="chart" aria-label="Graphique de progression hebdomadaire">
-                {[48, 62, 71, 66, 82, 78, 88].map((height, index) => <div className="bar-wrap" key={index}><div className="bar" style={{ height: `${height}%` }} /><span>{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][index]}</span></div>)}
-              </div>
+              <div className="chart" aria-label="Graphique de progression hebdomadaire">{[48, 62, 71, 66, 82, 78, 88].map((height, index) => <div className="bar-wrap" key={index}><div className="bar" style={{ height: `${height}%` }} /><span>{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][index]}</span></div>)}</div>
             </section>
 
             <section className="panel focus-panel">
@@ -147,22 +127,15 @@ export default function HomePage() {
 
             <section className="panel goals-panel">
               <div className="panel-heading"><div><h2>Objectifs actifs</h2><span>Ce qui compte maintenant</span></div><Target size={22} /></div>
-              <div className="goal-list">
-                {projects.map((project) => <div className="goal" key={project.name}><div className="goal-line"><strong>{project.name}</strong><span>{project.progress}%</span></div><small>{project.detail}</small><div className="progress-track"><div style={{ width: `${project.progress}%` }} /></div></div>)}
-              </div>
+              <div className="goal-list">{projects.map((project) => <div className="goal" key={project.name}><div className="goal-line"><strong>{project.name}</strong><span>{project.progress}%</span></div><small>{project.detail}</small><div className="progress-track"><div style={{ width: `${project.progress}%` }} /></div></div>)}</div>
             </section>
           </div>
 
-          <section className="bottom-grid">
-            <div className="principle-card"><Sparkle size={22} weight="fill" /><div><span>PRINCIPE DU JOUR</span><p>« La discipline est le pont entre tes objectifs et leur réalisation. »</p></div></div>
-            <div className="secure-card"><div><Heart size={22} weight="fill" /><strong>Suisse-first</strong></div><span>Conçu pour une expérience mobile simple, privée et accessible partout.</span></div>
-          </section>
+          <section className="bottom-grid"><div className="principle-card"><Sparkle size={22} weight="fill" /><div><span>PRINCIPE DU JOUR</span><p>« La discipline est le pont entre tes objectifs et leur réalisation. »</p></div></div><div className="secure-card"><div><Heart size={22} weight="fill" /><strong>Suisse-first</strong></div><span>Conçu pour une expérience mobile simple, privée et accessible partout.</span></div></section>
         </div>
       </section>
 
-      <nav className="mobile-nav" aria-label="Navigation mobile">
-        {navItems.slice(0, 5).map(({ label, icon: Icon }) => <button key={label} className={active === label ? 'mobile-nav-item active' : 'mobile-nav-item'} onClick={() => setActive(label)}><Icon size={20} weight={active === label ? 'fill' : 'regular'} /><span>{label === 'Accueil' ? 'Accueil' : label}</span></button>)}
-      </nav>
+      <nav className="mobile-nav" aria-label="Navigation mobile">{navItems.slice(0, 5).map(({ label, icon: Icon }) => <button key={label} className={active === label ? 'mobile-nav-item active' : 'mobile-nav-item'} onClick={() => setActive(label)}><Icon size={20} weight={active === label ? 'fill' : 'regular'} /><span>{label}</span></button>)}</nav>
     </main>
   );
 }
