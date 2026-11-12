@@ -1,65 +1,125 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { BellIcon as Bell } from '@phosphor-icons/react/dist/csr/Bell';
-import { BookOpenIcon as BookOpen } from '@phosphor-icons/react/dist/csr/BookOpen';
-import { BrainIcon as Brain } from '@phosphor-icons/react/dist/csr/Brain';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarDotsIcon as CalendarDots } from '@phosphor-icons/react/dist/csr/CalendarDots';
 import { ChartLineUpIcon as ChartLineUp } from '@phosphor-icons/react/dist/csr/ChartLineUp';
 import { CheckCircleIcon as CheckCircle } from '@phosphor-icons/react/dist/csr/CheckCircle';
 import { CircleIcon as Circle } from '@phosphor-icons/react/dist/csr/Circle';
-import { CrosshairIcon as Crosshair } from '@phosphor-icons/react/dist/csr/Crosshair';
 import { CrownIcon as Crown } from '@phosphor-icons/react/dist/csr/Crown';
-import { GearIcon as Gear } from '@phosphor-icons/react/dist/csr/Gear';
-import { HeartIcon as Heart } from '@phosphor-icons/react/dist/csr/Heart';
 import { HouseIcon as House } from '@phosphor-icons/react/dist/csr/House';
 import { ListChecksIcon as ListChecks } from '@phosphor-icons/react/dist/csr/ListChecks';
-import { MagnifyingGlassIcon as MagnifyingGlass } from '@phosphor-icons/react/dist/csr/MagnifyingGlass';
-import { MoonIcon as Moon } from '@phosphor-icons/react/dist/csr/Moon';
-import { PlusIcon as Plus } from '@phosphor-icons/react/dist/csr/Plus';
 import { SparkleIcon as Sparkle } from '@phosphor-icons/react/dist/csr/Sparkle';
 import { TargetIcon as Target } from '@phosphor-icons/react/dist/csr/Target';
-import { TrophyIcon as Trophy } from '@phosphor-icons/react/dist/csr/Trophy';
 import { UserCircleIcon as UserCircle } from '@phosphor-icons/react/dist/csr/UserCircle';
-import { WalletIcon as Wallet } from '@phosphor-icons/react/dist/csr/Wallet';
+
+type Routine = {
+  id: number;
+  title: string;
+  time: string;
+  duration: string;
+  done: boolean;
+};
+
+const STORAGE_KEY = 'g-fondation:routines:v1';
 
 const navItems = [
-  { label: 'Accueil', icon: House },
-  { label: 'Routines', icon: ListChecks },
-  { label: 'Focus', icon: Crosshair },
-  { label: 'Finance', icon: Wallet },
-  { label: 'Santé', icon: Heart },
-  { label: 'Projets', icon: Target },
-  { label: 'Apprentissage', icon: BookOpen },
-  { label: 'Journal', icon: BookOpen },
-  { label: 'Statistiques', icon: ChartLineUp },
-  { label: 'Paramètres', icon: Gear },
+  { label: "Aujourd'hui", icon: House },
+  { label: 'Objectifs', icon: Target },
+  { label: 'Progression', icon: ChartLineUp },
+  { label: 'Profil', icon: UserCircle },
 ];
 
-const initialRoutines = [
-  { id: 1, title: 'Prière du matin', time: '06:00', duration: '10 min', done: true },
-  { id: 2, title: 'Méditation', time: '06:20', duration: '15 min', done: true },
-  { id: 3, title: 'Entraînement', time: '07:00', duration: '60 min', done: true },
-  { id: 4, title: 'Travail profond', time: '09:00', duration: '90 min', done: false },
-  { id: 5, title: 'Lecture', time: '21:00', duration: '20 min', done: true },
+const initialRoutines: Routine[] = [
+  { id: 1, title: 'Planifier ma journée', time: '08:00', duration: '10 min', done: false },
+  { id: 2, title: 'Bouger', time: '12:30', duration: '30 min', done: false },
+  { id: 3, title: 'Travail concentré', time: '14:00', duration: '60 min', done: false },
+  { id: 4, title: 'Apprendre', time: '19:00', duration: '20 min', done: false },
+  { id: 5, title: 'Lecture', time: '21:00', duration: '20 min', done: false },
 ];
 
-const projects = [
-  { name: 'G-Fondation', progress: 68, detail: 'Construire le produit' },
-  { name: 'Forme physique', progress: 72, detail: 'Atteindre un objectif personnel' },
-  { name: 'Marque personnelle', progress: 40, detail: 'Lancer le contenu' },
-];
+function getSwissDayKey(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Zurich',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function isRoutineList(value: unknown): value is Routine[] {
+  return Array.isArray(value) && value.every((item) =>
+    typeof item === 'object' &&
+    item !== null &&
+    typeof item.id === 'number' &&
+    typeof item.title === 'string' &&
+    typeof item.time === 'string' &&
+    typeof item.duration === 'string' &&
+    typeof item.done === 'boolean'
+  );
+}
 
 export default function HomePage() {
-  const [active, setActive] = useState('Accueil');
-  const [routines, setRoutines] = useState(initialRoutines);
-  const [focusStarted, setFocusStarted] = useState(false);
+  const [active, setActive] = useState("Aujourd'hui");
+  const [routines, setRoutines] = useState<Routine[]>(initialRoutines);
+  const [todayKey, setTodayKey] = useState('');
+  const [todayLabel, setTodayLabel] = useState('');
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const now = new Date();
+    const dayKey = getSwissDayKey(now);
+    const label = new Intl.DateTimeFormat('fr-CH', {
+      timeZone: 'Europe/Zurich',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(now);
+
+    setTodayKey(dayKey);
+    setTodayLabel(label.charAt(0).toLocaleUpperCase('fr-CH') + label.slice(1));
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (
+          typeof parsed === 'object' &&
+          parsed !== null &&
+          'day' in parsed &&
+          parsed.day === dayKey &&
+          'routines' in parsed &&
+          isRoutineList(parsed.routines)
+        ) {
+          setRoutines(parsed.routines);
+        }
+      }
+    } catch {
+      // Keep the in-memory defaults when browser storage is unavailable or invalid.
+    }
+
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !todayKey) return;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ day: todayKey, routines }));
+    } catch {
+      // The daily routine checklist remains usable if storage is unavailable.
+    }
+  }, [hydrated, todayKey, routines]);
 
   const completed = useMemo(() => routines.filter((routine) => routine.done).length, [routines]);
-  const score = Math.round((completed / routines.length) * 100);
+  const score = routines.length === 0 ? 0 : Math.round((completed / routines.length) * 100);
 
   function toggleRoutine(id: number) {
-    setRoutines((items) => items.map((item) => (item.id === id ? { ...item, done: !item.done } : item)));
+    setRoutines((items) => items.map((item) => (
+      item.id === id ? { ...item, done: !item.done } : item
+    )));
   }
 
   return (
@@ -67,77 +127,164 @@ export default function HomePage() {
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark"><Crown size={20} weight="fill" /></span>
-          <div><strong>G-FONDATION</strong><span>Discipline. Foi. Action.</span></div>
+          <div><strong>G-FONDATION</strong><span>Clarté. Progression. Action.</span></div>
         </div>
         <nav className="side-nav" aria-label="Navigation principale">
           {navItems.map(({ label, icon: Icon }) => (
-            <button key={label} className={active === label ? 'nav-item active' : 'nav-item'} onClick={() => setActive(label)}>
-              <Icon size={19} weight={active === label ? 'fill' : 'regular'} /><span>{label}</span>
+            <button
+              key={label}
+              className={active === label ? 'nav-item active' : 'nav-item'}
+              onClick={() => setActive(label)}
+              aria-current={active === label ? 'page' : undefined}
+            >
+              <Icon size={19} weight={active === label ? 'fill' : 'regular'} />
+              <span>{label}</span>
             </button>
           ))}
         </nav>
-        <div className="side-quote"><Sparkle size={18} weight="fill" /><p>Une vie alignée. Un impact durable.</p><small>Chaque petit effort compte.</small></div>
-        <div className="profile-card"><UserCircle size={34} weight="duotone" /><div><strong>Profil</strong><span>Discipline • Excellence</span></div></div>
+        <div className="side-quote">
+          <Sparkle size={18} weight="fill" />
+          <p>Construire des progrès durables.</p>
+          <small>Un pas concret à la fois.</small>
+        </div>
+        <div className="profile-card">
+          <UserCircle size={34} weight="duotone" />
+          <div><strong>Ton espace</strong><span>Personnel et évolutif</span></div>
+        </div>
       </aside>
 
       <section className="workspace">
         <header className="topbar">
           <div className="mobile-brand"><Crown size={18} weight="fill" /> G-FONDATION</div>
-          <label className="search"><MagnifyingGlass size={18} /><input aria-label="Rechercher" placeholder="Rechercher..." /></label>
-          <div className="top-actions"><Bell size={19} /><Moon size={19} /><span className="avatar">G</span></div>
+          <div className="top-actions"><span className="avatar" aria-label="Profil">G</span></div>
         </header>
 
         <div className="content">
-          <div className="hero-row">
-            <div><p className="eyebrow">TABLEAU DE BORD</p><h1>Bonjour <Crown className="title-crown" size={28} weight="fill" /></h1><p className="subtitle">Sois fidèle dans les petites choses.</p></div>
-            <div className="date-pill"><CalendarDots size={18} /> Samedi 15 août 2026</div>
-          </div>
+          {active === "Aujourd'hui" ? (
+            <>
+              <div className="hero-row">
+                <div>
+                  <p className="eyebrow">TON ESPACE PERSONNEL</p>
+                  <h1>Bienvenue <Crown className="title-crown" size={28} weight="fill" /></h1>
+                  <p className="subtitle">Avance à ton rythme, un pas concret à la fois.</p>
+                </div>
+                <div className="date-pill"><CalendarDots size={18} /> {todayLabel || 'Date locale'}</div>
+              </div>
 
-          <div className="stats-grid">
-            <StatCard label="Score global" value={`${score}%`} note="+8% cette semaine" icon={<Crown size={22} weight="fill" />} accent="gold" />
-            <StatCard label="Routines" value={`${completed} / ${routines.length}`} note="complétées aujourd'hui" icon={<CheckCircle size={22} weight="fill" />} accent="green" />
-            <StatCard label="Focus" value="4h 25m" note="temps profond" icon={<Crosshair size={22} weight="fill" />} accent="blue" />
-            <StatCard label="Série actuelle" value="14 jours" note="meilleur : 28 jours" icon={<Trophy size={22} weight="fill" />} accent="orange" />
-          </div>
+              <div className="stats-grid">
+                <StatCard label="Score du jour" value={`${score}%`} note="Calculé sur les routines cochées" icon={<Crown size={22} weight="fill" />} accent="gold" />
+                <StatCard label="Routines" value={`${completed} / ${routines.length}`} note="Complétées aujourd'hui" icon={<CheckCircle size={22} weight="fill" />} accent="green" />
+                <StatCard label="Temps de focus" value="Non suivi" note="Chronométrage à venir" icon={<ChartLineUp size={22} />} accent="blue" />
+                <StatCard label="Série actuelle" value="À calculer" note="Historique en préparation" icon={<Sparkle size={22} />} accent="orange" />
+              </div>
 
-          <div className="dashboard-grid">
-            <section className="panel routines-panel">
-              <div className="panel-heading"><div><h2>Routines du jour</h2><span>{routines.length - completed} restantes</span></div><button className="icon-button" aria-label="Ajouter une routine"><Plus size={18} /></button></div>
-              <div className="routine-list">{routines.map((routine) => (
-                <button key={routine.id} className="routine-row" onClick={() => toggleRoutine(routine.id)}>
-                  {routine.done ? <CheckCircle className="routine-check done" size={23} weight="fill" /> : <Circle className="routine-check" size={23} />}
-                  <span className="routine-main"><strong>{routine.title}</strong><small>{routine.duration}</small></span><time>{routine.time}</time>
-                </button>
-              ))}</div>
-              <button className="secondary-button">Voir toutes les routines</button>
+              <div className="dashboard-grid">
+                <section className="panel routines-panel">
+                  <div className="panel-heading">
+                    <div><h2>Routines du jour</h2><span>{routines.length - completed} restantes</span></div>
+                  </div>
+                  <div className="routine-list">
+                    {routines.map((routine) => (
+                      <button
+                        key={routine.id}
+                        className="routine-row"
+                        onClick={() => toggleRoutine(routine.id)}
+                        aria-pressed={routine.done}
+                      >
+                        {routine.done
+                          ? <CheckCircle className="routine-check done" size={23} weight="fill" />
+                          : <Circle className="routine-check" size={23} />}
+                        <span className="routine-main">
+                          <strong>{routine.title}</strong>
+                          <small>{routine.duration}</small>
+                        </span>
+                        <time>{routine.time}</time>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="panel-note">Les coches sont enregistrées sur cet appareil et se réinitialisent chaque jour selon l'heure suisse.</p>
+                </section>
+
+                <section className="panel progress-panel">
+                  <div className="panel-heading">
+                    <div><h2>Progression hebdomadaire</h2><span>Ton historique réel apparaîtra ici</span></div>
+                    <ChartLineUp size={22} />
+                  </div>
+                  <div className="empty-state">
+                    <ChartLineUp size={28} />
+                    <strong>Pas encore assez de données</strong>
+                    <span>La progression sera calculée à partir de tes journées enregistrées.</span>
+                  </div>
+                </section>
+
+                <section className="panel focus-panel">
+                  <div className="panel-heading">
+                    <div><h2>Focus du jour</h2><span>Sessions de concentration</span></div>
+                    <Sparkle size={22} />
+                  </div>
+                  <div className="empty-state compact">
+                    <strong>Suivi du focus à venir</strong>
+                    <span>Aucune durée n'est affichée tant qu'une session réelle n'est pas enregistrée.</span>
+                  </div>
+                </section>
+
+                <section className="panel goals-panel">
+                  <div className="panel-heading">
+                    <div><h2>Objectifs actifs</h2><span>Ce qui compte maintenant</span></div>
+                    <Target size={22} />
+                  </div>
+                  <div className="empty-state compact">
+                    <strong>Aucun objectif enregistré</strong>
+                    <span>La création et le suivi des objectifs seront ajoutés dans cette section.</span>
+                    <button className="secondary-button" onClick={() => setActive('Objectifs')}>Voir les objectifs</button>
+                  </div>
+                </section>
+              </div>
+
+              <section className="bottom-grid">
+                <div className="principle-card">
+                  <Sparkle size={22} weight="fill" />
+                  <div><span>PRINCIPE DU JOUR</span><p>« La régularité se construit par de petites actions répétées. »</p></div>
+                </div>
+                <div className="secure-card">
+                  <div><Sparkle size={22} weight="fill" /><strong>Conception</strong></div>
+                  <span>Interface mobile-first. Les routines de démonstration restent stockées localement sur cet appareil.</span>
+                </div>
+              </section>
+            </>
+          ) : (
+            <section className="panel section-placeholder">
+              <p className="eyebrow">G-FONDATION / {active.toLocaleUpperCase('fr-CH')}</p>
+              <h1>{active}</h1>
+              <p className="subtitle">Cette section est en préparation. Elle sera activée après validation du parcours principal.</p>
+              <button className="secondary-button" onClick={() => setActive("Aujourd'hui")}>Retour à Aujourd'hui</button>
             </section>
-
-            <section className="panel progress-panel">
-              <div className="panel-heading"><div><h2>Progression hebdomadaire</h2><span>Ton rythme des 7 derniers jours</span></div><span className="badge">78%</span></div>
-              <div className="chart" aria-label="Graphique de progression hebdomadaire">{[48, 62, 71, 66, 82, 78, 88].map((height, index) => <div className="bar-wrap" key={index}><div className="bar" style={{ height: `${height}%` }} /><span>{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][index]}</span></div>)}</div>
-            </section>
-
-            <section className="panel focus-panel">
-              <div className="panel-heading"><div><h2>Focus du jour</h2><span>Un bloc sans distraction</span></div><Brain size={22} /></div>
-              <div className="focus-card"><div className="focus-ring"><span>90%</span></div><div><strong>Travail profond</strong><small>Objectif : 90 minutes</small></div></div>
-              <button className="primary-button" onClick={() => setFocusStarted((value) => !value)}>{focusStarted ? 'Session en cours' : 'Démarrer le focus'}</button>
-            </section>
-
-            <section className="panel goals-panel">
-              <div className="panel-heading"><div><h2>Objectifs actifs</h2><span>Ce qui compte maintenant</span></div><Target size={22} /></div>
-              <div className="goal-list">{projects.map((project) => <div className="goal" key={project.name}><div className="goal-line"><strong>{project.name}</strong><span>{project.progress}%</span></div><small>{project.detail}</small><div className="progress-track"><div style={{ width: `${project.progress}%` }} /></div></div>)}</div>
-            </section>
-          </div>
-
-          <section className="bottom-grid"><div className="principle-card"><Sparkle size={22} weight="fill" /><div><span>PRINCIPE DU JOUR</span><p>« La discipline est le pont entre tes objectifs et leur réalisation. »</p></div></div><div className="secure-card"><div><Heart size={22} weight="fill" /><strong>Suisse-first</strong></div><span>Conçu pour une expérience mobile simple, privée et accessible partout.</span></div></section>
+          )}
         </div>
       </section>
 
-      <nav className="mobile-nav" aria-label="Navigation mobile">{navItems.slice(0, 5).map(({ label, icon: Icon }) => <button key={label} className={active === label ? 'mobile-nav-item active' : 'mobile-nav-item'} onClick={() => setActive(label)}><Icon size={20} weight={active === label ? 'fill' : 'regular'} /><span>{label}</span></button>)}</nav>
+      <nav className="mobile-nav" aria-label="Navigation mobile">
+        {navItems.map(({ label, icon: Icon }) => (
+          <button
+            key={label}
+            className={active === label ? 'mobile-nav-item active' : 'mobile-nav-item'}
+            onClick={() => setActive(label)}
+            aria-current={active === label ? 'page' : undefined}
+          >
+            <Icon size={20} weight={active === label ? 'fill' : 'regular'} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
     </main>
   );
 }
 
 function StatCard({ label, value, note, icon, accent }: { label: string; value: string; note: string; icon: React.ReactNode; accent: string }) {
-  return <article className={`stat-card ${accent}`}><div className="stat-icon">{icon}</div><div><span>{label}</span><strong>{value}</strong><small>{note}</small></div></article>;
+  return (
+    <article className={`stat-card ${accent}`}>
+      <div className="stat-icon">{icon}</div>
+      <div><span>{label}</span><strong>{value}</strong><small>{note}</small></div>
+    </article>
+  );
 }

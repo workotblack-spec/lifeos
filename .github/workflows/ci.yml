@@ -2,9 +2,16 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - feat/g-fondation-dashboard-v1
   push:
-    branches: [main]
+    branches:
+      - main
+      - fix/g-fondation-stabilization
+
+permissions:
+  contents: read
 
 jobs:
   quality:
@@ -17,9 +24,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install dependencies and regenerate lockfile
-        run: npm install --no-audit --no-fund
+      - name: Install dependencies from lockfile
+        run: npm ci --no-audit --no-fund
 
       - name: Typecheck
         run: npm run typecheck
@@ -29,11 +37,3 @@ jobs:
 
       - name: Production build
         run: npm run build
-
-      - name: Upload generated lockfile for review
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: g-fondation-package-lock
-          path: package-lock.json
-          if-no-files-found: error
