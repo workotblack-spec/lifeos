@@ -1,29 +1,27 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  BellSimpleIcon as Bell,
-  BookOpenIcon as BookOpen,
-  BrainIcon as Brain,
-  CalendarDotsIcon as CalendarDots,
-  ChartLineUpIcon as ChartLineUp,
-  CheckCircleIcon as CheckCircle,
-  CircleIcon as Circle,
-  CrosshairIcon as Crosshair,
-  CrownIcon as Crown,
-  GearIcon as Gear,
-  HeartIcon as Heart,
-  HouseIcon as House,
-  ListChecksIcon as ListChecks,
-  MagnifyingGlassIcon as MagnifyingGlass,
-  MoonIcon as Moon,
-  PlusIcon as Plus,
-  SparkleIcon as Sparkle,
-  TargetIcon as Target,
-  TrophyIcon as Trophy,
-  UserCircleIcon as UserCircle,
-  WalletIcon as Wallet,
-} from '@phosphor-icons/react';
+import { BellIcon as Bell } from '@phosphor-icons/react/dist/csr/Bell';
+import { BookOpenIcon as BookOpen } from '@phosphor-icons/react/dist/csr/BookOpen';
+import { BrainIcon as Brain } from '@phosphor-icons/react/dist/csr/Brain';
+import { CalendarDotsIcon as CalendarDots } from '@phosphor-icons/react/dist/csr/CalendarDots';
+import { ChartLineUpIcon as ChartLineUp } from '@phosphor-icons/react/dist/csr/ChartLineUp';
+import { CheckCircleIcon as CheckCircle } from '@phosphor-icons/react/dist/csr/CheckCircle';
+import { CircleIcon as Circle } from '@phosphor-icons/react/dist/csr/Circle';
+import { CrosshairIcon as Crosshair } from '@phosphor-icons/react/dist/csr/Crosshair';
+import { CrownIcon as Crown } from '@phosphor-icons/react/dist/csr/Crown';
+import { GearIcon as Gear } from '@phosphor-icons/react/dist/csr/Gear';
+import { HeartIcon as Heart } from '@phosphor-icons/react/dist/csr/Heart';
+import { HouseIcon as House } from '@phosphor-icons/react/dist/csr/House';
+import { ListChecksIcon as ListChecks } from '@phosphor-icons/react/dist/csr/ListChecks';
+import { MagnifyingGlassIcon as MagnifyingGlass } from '@phosphor-icons/react/dist/csr/MagnifyingGlass';
+import { MoonIcon as Moon } from '@phosphor-icons/react/dist/csr/Moon';
+import { PlusIcon as Plus } from '@phosphor-icons/react/dist/csr/Plus';
+import { SparkleIcon as Sparkle } from '@phosphor-icons/react/dist/csr/Sparkle';
+import { TargetIcon as Target } from '@phosphor-icons/react/dist/csr/Target';
+import { TrophyIcon as Trophy } from '@phosphor-icons/react/dist/csr/Trophy';
+import { UserCircleIcon as UserCircle } from '@phosphor-icons/react/dist/csr/UserCircle';
+import { WalletIcon as Wallet } from '@phosphor-icons/react/dist/csr/Wallet';
 
 const navItems = [
   { label: 'Accueil', icon: House },
