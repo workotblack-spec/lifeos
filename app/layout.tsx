@@ -1,21 +1,15 @@
-"use client";
-
+import type { ReactNode } from 'react';
 import '../styles/globals.css';
-import { useEffect, useState } from 'react';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+export const metadata = {
+  title: 'G-Fondation',
+  description: 'Ton système personnel de progression.',
+};
 
-  useEffect(() => {
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setTheme(prefersDark ? 'dark' : 'light');
-  }, []);
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" data-theme={theme}>
-      <body className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen">
-        {children}
-      </body>
+    <html lang="fr">
+      <body>{children}</body>
     </html>
   );
 }

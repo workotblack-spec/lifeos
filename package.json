@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "next dev",
     "lint": "tsc -p tsconfig.build.json --noEmit",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "build:ts": "tsc -p tsconfig.json",
@@ -11,10 +12,16 @@
     "test": "node --test test/*.test.mjs",
     "build": "next build"
   },
-  "devDependencies": {
-    "typescript": "^5.9.2",
-    "next": "13.4.10",
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.7",
+    "next": "15.5.29",
     "react": "18.2.0",
     "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.7",
+    "typescript": "^5.9.2"
   }
 }
