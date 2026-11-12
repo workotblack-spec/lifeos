@@ -4,5 +4,13 @@
     "noEmit": true,
     "incremental": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "app/**/*.tsx", "components/**/*.tsx", "src/**/*.ts"]
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
