@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import {
-  BellIcon as Bell,
+  BellSimpleIcon as Bell,
   BookOpenIcon as BookOpen,
   BrainIcon as Brain,
   CalendarDotsIcon as CalendarDots,
