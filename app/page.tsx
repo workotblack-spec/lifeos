@@ -247,7 +247,7 @@ export default function HomePage() {
                   <div><span>PRINCIPE DU JOUR</span><p>« La régularité se construit par de petites actions répétées. »</p></div>
                 </div>
                 <div className="secure-card">
-                  <div><HeartIconPlaceholder /><strong>Conception</strong></div>
+                  <div><Sparkle size={22} weight="fill" /><strong>Conception</strong></div>
                   <span>Interface mobile-first. Les routines de démonstration restent stockées localement sur cet appareil.</span>
                 </div>
               </section>
@@ -287,8 +287,4 @@ function StatCard({ label, value, note, icon, accent }: { label: string; value: 
       <div><span>{label}</span><strong>{value}</strong><small>{note}</small></div>
     </article>
   );
-}
-
-function HeartIconPlaceholder() {
-  return <span aria-hidden="true" className="status-dot" />;
 }
